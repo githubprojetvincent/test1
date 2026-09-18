@@ -1,13 +1,200 @@
-import React,{useEffect,useMemo,useState}from'react';import{createRoot}from'react-dom/client';import{Activity,Clock3,Github,HeartPulse,Play,Radar as RadarIcon,Settings,ShieldCheck,UserRound,Wifi}from'lucide-react';import'./style.css';
+import React, { useMemo, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import {
+  Activity, ArrowUpRight, CalendarDays, Dumbbell, Ruler, Save,
+  Settings, TrendingUp, UserRound, Weight, X
+} from 'lucide-react';
+import './style.css';
 
-type Zone={name:string;x:number;y:number;level:number};
-const zones:Zone[]=[{name:'Présence',x:26,y:28,level:0},{name:'Mouvement',x:67,y:36,level:0},{name:'Respiration',x:55,y:68,level:0}];
-function App(){const[presence,setPresence]=useState(false),[motion,setMotion]=useState(false),[scan,setScan]=useState(false),[confidence,setConfidence]=useState(18),[auto,setAuto]=useState(true),[history,setHistory]=useState<number[]>([18,20,17,21,26,23,25,28]);
- const run=()=>{if(scan)return;setScan(true);let n=0;const t=setInterval(()=>{n+=1;setConfidence(Math.min(96,18+n*7));if(n>=11){clearInterval(t);const present=Math.random()>.25;setPresence(present);setMotion(present&&Math.random()>.35);setConfidence(present?Math.floor(82+Math.random()*15):Math.floor(8+Math.random()*18));setHistory(h=>[...h.slice(-9),present?90:12]);setScan(false)}},160)};
- useEffect(()=>{if(!auto)return;const t=setInterval(run,30000);return()=>clearInterval(t)},[auto]);
- const status=presence?'HUMAIN DÉTECTÉ':'ZONE LIBRE';const graph=useMemo(()=>history.map((v,i)=>`${i*50},${120-v}`).join(' '),[history]);
- return <div className="app"><header><div className="brand"><div className="brandIcon"><Wifi/></div><div><h1>WiFi Sense</h1><p>Détection de présence par analyse du signal Wi‑Fi</p></div></div><nav><button className="active"><RadarIcon/>Radar</button><button><UserRound/>Présence</button><button><Clock3/>Historique</button><button><Settings/>Paramètres</button></nav><div className="status"><i/>{scan?'Analyse…':'Système actif'}<strong>CSI Sensing</strong></div></header>
- <div className="workspace"><aside className="left"><button className="scanBtn" onClick={run} disabled={scan}><Play fill="currentColor"/>{scan?'ANALYSE EN COURS':'LANCER L’ANALYSE'}</button><div className="switchRow"><span>Surveillance automatique</span><button className={'switch '+(auto?'on':'')} onClick={()=>setAuto(!auto)}><i/></button></div><div className="big"><b>{presence?'1':'0'}</b><span>personne estimée</span><HeartPulse/></div><div className="metric"><span>Confiance</span><strong>{confidence}%</strong><div className="bar"><i style={{width:confidence+'%'}}/></div></div><div className="metric"><span>État du mouvement</span><strong>{motion?'Mouvement':'Stable'}</strong></div><div className="network"><b><Wifi/> Liaison de sensing</b><p>Source<strong>Wi‑Fi CSI</strong></p><p>Mode<strong>Non-contact</strong></p><p>Dernière analyse<strong>à l’instant</strong></p></div><div className="menu"><a className="selected"><RadarIcon/>Vue radar</a><a><Activity/>Signal CSI</a><a><UserRound/>Présence</a><a><Clock3/>Historique</a><a><Settings/>Paramètres</a></div><div className="git"><Github/>WiFi Sense<small>Prototype open source</small></div></aside>
- <section className="center"><div className="radar"><div className="sweep"/><div className="line h"/><div className="line v"/><div className="ring r1"/><div className="ring r2"/><div className="ring r3"/><div className="origin"><Wifi/></div><span className="N">N</span><span className="E">E</span><span className="S">S</span><span className="O">O</span>{presence&&<div className="human" style={{left:'50%',top:'50%'}}><UserRound/><b>Humain détecté</b><small>{confidence}% de confiance</small></div>}{zones.map((z,i)=><div className="zone" key={i} style={{left:z.x+'%',top:z.y+'%'}}><span className={presence?'hot':''}/><small>{z.name}</small></div>)}</div><div className="progress"><div><span className={scan?'loader':''}/><b>{scan?'Analyse CSI en cours…':status}</b><small>Variations du canal radio analysées localement</small></div><div className="bar"><i style={{width:confidence+'%'}}/></div><span>{confidence}%</span></div><div className="cards"><div><h3>État de présence</h3><div className={'presence '+(presence?'detected':'clear')}><ShieldCheck/>{presence?'Présence probable':'Aucune présence'}<small>{presence?'Signal perturbé par un corps humain':'Canal proche du profil de pièce vide'}</small></div></div><div><h3>Signal Wi‑Fi</h3><p className="mini">Variation CSI en temps réel</p><svg className="chart" viewBox="0 0 500 120" preserveAspectRatio="none"><polyline points={graph} fill="none" stroke="currentColor" strokeWidth="3"/></svg></div><div><h3>Détection récente</h3><div className="event"><HeartPulse/><span><b>{presence?'Présence détectée':'Zone libre'}</b><em>{motion?'Mouvement en cours':'Pas de mouvement significatif'}</em></span></div></div></div></section>
- <aside className="right"><h2>Analyse de présence</h2><div className="heroStatus"><div className={'orb '+(presence?'on':'')}><UserRound/></div><strong>{status}</strong><small>{confidence}% de confiance</small></div><div className="row"><span>Présence</span><b>{presence?'OUI':'NON'}</b></div><div className="row"><span>Mouvement</span><b>{motion?'OUI':'NON'}</b></div><div className="row"><span>Type de mesure</span><b>CSI</b></div><div className="explain"><strong>Comment ça marche ?</strong><p>Le système mesure les variations du canal Wi‑Fi. Les mouvements humains modifient la propagation radio ; un algorithme peut alors estimer une présence sans caméra.</p></div><div className="warning">⚠️ Ce prototype indique une probabilité de présence, pas l'identité d'une personne.</div></aside></div><footer>WiFi Sense • présence sans caméra • traitement local</footer></div>}
+type SetRow = { weight: string; reps: string };
+type Session = {
+  id: number; date: string; name: string; duration: string; sets: number;
+  exercises: string; note: string;
+};
+type Measure = {
+  weight: string; height: string; shoulders: string; chest: string; arm: string;
+  waist: string; thigh: string; calf: string;
+};
+
+const starterSessions: Session[] = [
+  { id: 1, date: new Date().toISOString().slice(0,10), name: 'Push', duration: '62', sets: 16, exercises: 'Développé couché, Élévations latérales, Triceps', note: 'Bonne séance' },
+  { id: 2, date: '2026-09-15', name: 'Pull', duration: '58', sets: 15, exercises: 'Tractions, Rowing, Curl biceps', note: '' },
+  { id: 3, date: '2026-09-13', name: 'Legs', duration: '70', sets: 18, exercises: 'Squat, Presse, Leg curl', note: '' },
+];
+
+const starterMeasures: Measure = {
+  weight: '', height: '', shoulders: '', chest: '', arm: '', waist: '', thigh: '', calf: ''
+};
+
+function load<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) as T : fallback;
+  } catch { return fallback; }
+}
+
+function App() {
+  const [tab, setTab] = useState('home');
+  const [measures, setMeasures] = useState<Measure>(() => load('muscu-measures', starterMeasures));
+  const [sessions, setSessions] = useState<Session[]>(() => load('muscu-sessions', starterSessions));
+  const [showSession, setShowSession] = useState(false);
+  const [sessionName, setSessionName] = useState('Push');
+  const [sessionNote, setSessionNote] = useState('');
+  const [rows, setRows] = useState<SetRow[]>([
+    {weight:'',reps:''},{weight:'',reps:''},{weight:'',reps:''},{weight:'',reps:''}
+  ]);
+
+  const saveMeasures = () => {
+    localStorage.setItem('muscu-measures', JSON.stringify(measures));
+    setTab('body');
+  };
+
+  const totalSessions = sessions.length;
+  const avgDuration = Math.round(
+    sessions.reduce((sum, s) => sum + (Number(s.duration) || 0), 0) / Math.max(totalSessions, 1)
+  );
+  const latestWeight = measures.weight || '—';
+
+  const progression = useMemo(() => [
+    {label:'Développé couché', value:'80 kg', delta:'+5 kg'},
+    {label:'Squat', value:'100 kg', delta:'+10 kg'},
+    {label:'Tractions', value:'+15 kg', delta:'+5 kg'},
+  ], []);
+
+  const addRow = () => setRows(r => [...r, {weight:'', reps:''}]);
+  const removeRow = (i:number) => setRows(r => r.filter((_, idx) => idx !== i));
+
+  const saveSession = () => {
+    const filled = rows.filter(r => r.weight || r.reps);
+    const newSession: Session = {
+      id: Date.now(),
+      date: new Date().toISOString().slice(0,10),
+      name: sessionName,
+      duration: '—',
+      sets: filled.length,
+      exercises: 'Série enregistrée',
+      note: sessionNote
+    };
+    const next = [newSession, ...sessions];
+    setSessions(next);
+    localStorage.setItem('muscu-sessions', JSON.stringify(next));
+    setShowSession(false);
+    setSessionNote('');
+    setRows([{weight:'',reps:''},{weight:'',reps:''},{weight:'',reps:''},{weight:'',reps:''}]);
+    setTab('sessions');
+  };
+
+  return (
+    <div className="app">
+      <header className="topbar">
+        <div className="brand">
+          <div className="logo"><Dumbbell size={22}/></div>
+          <div>
+            <strong>IronTrack</strong>
+            <span>Mon suivi musculation</span>
+          </div>
+        </div>
+        <button className="add" onClick={() => setShowSession(true)}><span>＋</span> Nouvelle séance</button>
+      </header>
+
+      <main>
+        {tab === 'home' && (
+          <>
+            <section className="hero">
+              <div>
+                <p className="eyebrow">TON PROGRÈS</p>
+                <h1>Simple. Rapide. <span>Régulier.</span></h1>
+                <p className="muted">Tout ce qu'il faut pour suivre tes séances sans te perdre dans les tableaux.</p>
+              </div>
+              <div className="hero-figure"><UserRound size={104}/><div className="figure-glow"/></div>
+            </section>
+
+            <section className="stats">
+              <Stat icon={<Weight size={18}/>} label="Poids" value={latestWeight} unit={latestWeight === '—' ? '' : 'kg'} />
+              <Stat icon={<CalendarDays size={18}/>} label="Séances" value={String(totalSessions)} unit="total" />
+              <Stat icon={<Activity size={18}/>} label="Durée moyenne" value={String(avgDuration)} unit="min" />
+              <Stat icon={<TrendingUp size={18}/>} label="Objectif" value="Progression" unit="" />
+            </section>
+
+            <section className="grid2">
+              <Card title="Cette semaine" icon={<CalendarDays size={18}/>} action="Voir les séances" onClick={() => setTab('sessions')}>
+                <div className="week">
+                  {['L','M','M','J','V','S','D'].map((d,i) => <div key={i} className={'day '+(i<4?'done':'')}><span>{d}</span><b>{i<4?'✓':''}</b></div>)}
+                </div>
+                <div className="progress-line"><span/><em>4 / 5 séances</em></div>
+              </Card>
+              <Card title="Tes performances" icon={<TrendingUp size={18}/>} action="Tout voir" onClick={() => setTab('performance')}>
+                {progression.map((p, i) => <div className="perf" key={i}><div><strong>{p.label}</strong><small>Record actuel</small></div><b>{p.value}</b><span>{p.delta}</span></div>)}
+              </Card>
+            </section>
+
+            <section className="quick">
+              <button onClick={() => setShowSession(true)}><Dumbbell/><span><b>Commencer une séance</b><small>Enregistre poids & répétitions</small></span><ArrowUpRight/></button>
+              <button onClick={() => setTab('body')}><Ruler/><span><b>Mettre mes mensurations</b><small>Poids, taille et corps</small></span><ArrowUpRight/></button>
+            </section>
+          </>
+        )}
+
+        {tab === 'sessions' && (
+          <section>
+            <div className="pageHead"><div><p className="eyebrow">HISTORIQUE</p><h2>Mes séances</h2><p className="muted">Toutes tes séances au même endroit.</p></div><button className="primary" onClick={() => setShowSession(true)}>＋ Nouvelle séance</button></div>
+            <div className="sessionList">
+              {sessions.map(s => <article className="session" key={s.id}><div className="sessionDate"><b>{new Date(s.date).getDate()}</b><span>{new Date(s.date).toLocaleDateString('fr-FR',{month:'short'})}</span></div><div className="sessionInfo"><strong>{s.name}</strong><span>{s.exercises}</span><small>{s.duration} min · {s.sets} séries {s.note ? '· '+s.note : ''}</small></div><ArrowUpRight/></article>)}
+            </div>
+          </section>
+        )}
+
+        {tab === 'performance' && (
+          <section>
+            <div className="pageHead"><div><p className="eyebrow">PROGRESSION</p><h2>Mes performances</h2><p className="muted">Tes records principaux.</p></div></div>
+            <div className="performanceGrid">
+              {progression.map((p, i) => <div className="bigPerf" key={i}><small>{p.label}</small><strong>{p.value}</strong><span>{p.delta} depuis ton suivi précédent</span><div className="miniChart"><i style={{height:(45+i*14)+'%'}}/><i style={{height:(62+i*10)+'%'}}/><i style={{height:(55+i*13)+'%'}}/><i style={{height:(76+i*7)+'%'}}/><i style={{height:(92)+'%'}}/></div></div>)}
+            </div>
+          </section>
+        )}
+
+        {tab === 'body' && (
+          <section>
+            <div className="pageHead"><div><p className="eyebrow">MON CORPS</p><h2>Mes mensurations</h2><p className="muted">Remplis une fois, puis mets à jour au fil des semaines.</p></div></div>
+            <div className="bodyLayout">
+              <div className="silhouette">
+                <UserRound size={200} strokeWidth={1.2}/>
+                <span className="pin p1">Épaules</span><span className="pin p2">Poitrine</span><span className="pin p3">Bras</span><span className="pin p4">Taille</span><span className="pin p5">Cuisses</span><span className="pin p6">Mollets</span>
+              </div>
+              <div className="formCard">
+                <div className="formRow"><Field label="Poids (kg)" value={measures.weight} onChange={v=>setMeasures({...measures,weight:v})}/><Field label="Taille (cm)" value={measures.height} onChange={v=>setMeasures({...measures,height:v})}/></div>
+                <div className="formRow"><Field label="Épaules" value={measures.shoulders} onChange={v=>setMeasures({...measures,shoulders:v})}/><Field label="Poitrine" value={measures.chest} onChange={v=>setMeasures({...measures,chest:v})}/></div>
+                <div className="formRow"><Field label="Bras" value={measures.arm} onChange={v=>setMeasures({...measures,arm:v})}/><Field label="Taille" value={measures.waist} onChange={v=>setMeasures({...measures,waist:v})}/></div>
+                <div className="formRow"><Field label="Cuisse" value={measures.thigh} onChange={v=>setMeasures({...measures,thigh:v})}/><Field label="Mollet" value={measures.calf} onChange={v=>setMeasures({...measures,calf:v})}/></div>
+                <button className="primary save" onClick={saveMeasures}><Save size={18}/> Enregistrer</button>
+              </div>
+            </div>
+          </section>
+        )}
+      </main>
+
+      <nav className="bottomNav">
+        {[
+          ['home','Accueil',<Activity size={19}/>],
+          ['sessions','Séances',<CalendarDays size={19}/>],
+          ['performance','Performances',<TrendingUp size={19}/>],
+          ['body','Corps',<Ruler size={19}/>],
+        ].map(([id,label,icon]) => <button key={String(id)} className={tab===id?'active':''} onClick={()=>setTab(String(id))}>{icon}<span>{label}</span></button>)}
+      </nav>
+
+      {showSession && <div className="modalBack"><div className="modal"><div className="modalHead"><div><p className="eyebrow">NOUVELLE SÉANCE</p><h3>Enregistrer ma séance</h3></div><button onClick={()=>setShowSession(false)}><X/></button></div><label>Type de séance<select value={sessionName} onChange={e=>setSessionName(e.target.value)}><option>Push</option><option>Pull</option><option>Legs</option><option>Full Body</option></select></label><div className="setsTitle"><span>Poids</span><span>Reps</span></div>{rows.map((r,i)=><div className="setRow" key={i}><input placeholder="kg" value={r.weight} onChange={e=>setRows(rows.map((x,j)=>j===i?{...x,weight:e.target.value}:x))}/><input placeholder="reps" value={r.reps} onChange={e=>setRows(rows.map((x,j)=>j===i?{...x,reps:e.target.value}:x))}/>{rows.length>1&&<button onClick={()=>removeRow(i)}><X size={15}/></button>}</div>)}<button className="addSet" onClick={addRow}>＋ Ajouter une série</button><label>Note<textarea value={sessionNote} onChange={e=>setSessionNote(e.target.value)} placeholder="Comment était la séance ?"/></label><button className="primary save" onClick={saveSession}><Save size={18}/> Enregistrer la séance</button></div></div>}
+    </div>
+  );
+}
+
+function Stat({icon,label,value,unit}:{icon:React.ReactNode;label:string;value:string;unit:string}) {
+  return <div className="stat"><div className="statIcon">{icon}</div><small>{label}</small><strong>{value}<em>{unit}</em></strong></div>
+}
+function Card({title,icon,action,onClick,children}:{title:string;icon:React.ReactNode;action:string;onClick:()=>void;children:React.ReactNode}) {
+  return <div className="card"><div className="cardHead"><div><span>{icon}</span><strong>{title}</strong></div><button onClick={onClick}>{action}<ArrowUpRight size={14}/></button></div>{children}</div>
+}
+function Field({label,value,onChange}:{label:string;value:string;onChange:(v:string)=>void}) {
+  return <label className="field"><span>{label}</span><input inputMode="decimal" value={value} onChange={e=>onChange(e.target.value)} placeholder="—"/></label>
+}
+
 createRoot(document.getElementById('root')!).render(<App/>);
