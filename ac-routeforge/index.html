@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AC RouteForge — Assetto Corsa Track Studio</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div><strong>AC RouteForge</strong><span> TRACK STUDIO</span></div>
+  <div class="top-actions">
+    <button id="newBtn">Nouvelle piste</button>
+    <button id="exportBtn">Exporter projet JSON</button>
+  </div>
+</header>
+<main class="workspace">
+  <section class="map-panel">
+    <div class="panel-title">CARTE / TRACE</div>
+    <div id="map"></div>
+    <div class="map-help">Clique sur la carte pour placer les points. Double-clique ou utilise « Terminer » pour fermer le tracé.</div>
+  </section>
+  <section class="editor-panel">
+    <div class="panel-title">APERÇU 3D</div>
+    <canvas id="preview"></canvas>
+    <div class="stats">
+      <div><small>POINTS</small><b id="pointsStat">0</b></div>
+      <div><small>DISTANCE</small><b id="distanceStat">0 m</b></div>
+      <div><small>LARGEUR</small><b><span id="widthValue">8</span> m</b></div>
+    </div>
+  </section>
+  <aside class="controls">
+    <div class="panel-title">TRACK SETTINGS</div>
+    <label>Largeur route <input id="width" type="range" min="4" max="18" step=".5" value="8"></label>
+    <label>Banking <input id="banking" type="range" min="-8" max="8" step=".5" value="0"></label>
+    <label>Résolution <select id="resolution"><option value="low">Rapide</option><option value="high" selected>Haute</option></select></label>
+    <div class="button-row">
+      <button id="finishBtn" class="primary">Terminer</button>
+      <button id="undoBtn">Annuler</button>
+    </div>
+    <div class="notice">
+      <strong>Pipeline AC</strong>
+      <p>Le navigateur génère le tracé et la scène de prévisualisation. L'export KN5 final peut être produit ensuite avec une toolchain Blender/KN5 compatible.</p>
+    </div>
+    <pre id="jsonPreview">{}</pre>
+  </aside>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
