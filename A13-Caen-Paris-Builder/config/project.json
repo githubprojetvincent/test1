@@ -1,0 +1,9 @@
+{
+  "project":"A13_Caen_Paris",
+  "osm_relation":1140738,
+  "length_km_target":225,
+  "sector_length_km":12,
+  "road":{"lanes_each_direction":2,"lane_width_m":3.5,"shoulder_outer_m":2.5,"shoulder_inner_m":1.0,"median_m":4.0},
+  "scene":{"terrain_margin_m":1200,"tree_density_per_km2":650,"guardrail":true,"signs":true,"bridges":true},
+  "assetto_corsa":{"track_name":"a13_caen_paris","use_local_kunos_assets":true,"kn5_export_required":true,"ai_required":true}
+}
